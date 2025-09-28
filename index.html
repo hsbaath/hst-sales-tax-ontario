@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0d74ce" />
+  <meta name="theme-color" content="#0d5cc0" />
   <title>Sales Tax</title>
   <!-- iOS: open fullscreen when added to Home Screen -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,60 +11,64 @@
   <meta name="apple-mobile-web-app-title" content="Sales Tax">
   <style>
     :root{
-      --bg:#0d74ce; /* primary */
+      --bg-start:#0b5ec3; /* refined blue */
+      --bg-mid:#0d74ce;
+      --bg-end:#0a5aa8;
       --ink:#ffffff;
-      --muted:rgba(255,255,255,.82); /* slightly stronger */
-      --card:rgba(255,255,255,.08);  /* clearer separation */
-      --card-border:rgba(255,255,255,.22);
-      --input-bg:rgba(255,255,255,.20);
-      --input-border:rgba(255,255,255,.28);
-      --chip-border:rgba(255,255,255,.30);
-      --ok:#16a34a; /* deeper green */
+      --muted:rgba(255,255,255,.85);
+      --card:rgba(255,255,255,.10);
+      --card-border:rgba(255,255,255,.28);
+      --input-bg:rgba(255,255,255,.22);
+      --input-border:rgba(255,255,255,.35);
+      --chip-border:rgba(255,255,255,.35);
+      --ok:#16a34a;
+      --danger:#ef4444;
     }
     *{box-sizing:border-box}
     html,body{height:100%;}
     body{
       margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      background: radial-gradient(120% 120% at 0% 0%, #0a67b7, #0d74ce 55%, #0e5fa4 115%);
+      background: radial-gradient(120% 120% at 0% 0%, var(--bg-start), var(--bg-mid) 55%, var(--bg-end) 115%);
       color:var(--ink);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
     .wrap{max-width:620px;margin:0 auto;padding:16px 18px 24px}
-    header{display:flex;align-items:center;justify-content:space-between;padding:6px 0 4px}
-    h1{font-size:20px;margin:0;font-weight:700;letter-spacing:.2px}
-    .chip{font-size:12px;opacity:.95;border:1px solid var(--chip-border);padding:4px 8px;border-radius:999px}
-    .card{background:var(--card);border:1px solid var(--card-border);backdrop-filter:saturate(1.2) blur(2px);border-radius:18px;padding:14px 14px;margin-top:12px}
-    .row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:8px 8px;border-radius:12px}
+    header{display:grid;grid-template-columns:1fr auto;align-items:center;padding:6px 0 4px}
+    h1{font-size:22px;margin:0;font-weight:800;letter-spacing:.2px}
+    .card{background:var(--card);border:1px solid var(--card-border);backdrop-filter:saturate(1.1) blur(2px);border-radius:20px;padding:14px 14px;margin-top:12px}
+    .row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px;border-radius:14px}
     .row + .row{margin-top:6px}
     label{font-size:16px;color:var(--muted)}
-    /* Use type=text with inputmode=decimal to allow programmatic selection on iOS */
-    input[type="text"]{width:160px;border:1px solid var(--input-border);outline:none;border-radius:12px;padding:10px 12px;font-size:18px;font-weight:700;background:var(--input-bg);color:var(--ink)}
-    input.small{width:110px;font-size:16px}
+
+    /* Inputs: text + decimal keypad */
+    input[type="text"]{width:180px;border:1px solid var(--input-border);outline:none;border-radius:14px;padding:12px 14px;font-size:18px;font-weight:800;background:var(--input-bg);color:var(--ink)}
+    input.small{width:120px;font-size:16px;font-weight:700}
+
     .muted{color:var(--muted)}
-    .total{font-size:40px;font-weight:800;letter-spacing:0.3px;margin:6px 0 4px;text-shadow:0 1px 0 rgba(0,0,0,.12)}
+    .total{font-size:44px;font-weight:900;letter-spacing:0.3px;margin:6px 0 4px;text-shadow:0 1px 0 rgba(0,0,0,.12)}
     .subtle{font-size:14px;color:var(--muted)}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .btn{appearance:none;border:1px solid var(--chip-border);background:rgba(255,255,255,.20);color:var(--ink);border-radius:12px;padding:12px 14px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-    .btn.primary{background:rgba(22,163,74,.9);border-color:rgba(22,163,74,1);color:#fff;box-shadow:0 6px 14px rgba(22,163,74,.35)}
+
+    .btn{appearance:none;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.18);color:#fff;border-radius:12px;padding:10px 12px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.08)}
     .btn:active{transform:translateY(1px)}
-    footer{opacity:.85;text-align:center;margin-top:16px;font-size:12px}
-    .badge{display:inline-flex;gap:8px;align-items:center;opacity:.95}
+    .btn.clear{background:rgba(239,68,68,.20);border-color:rgba(239,68,68,.55)}
+
     .inline{display:inline-flex;gap:10px;align-items:center}
     .right{justify-self:end}
     .switch{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
     .switch input{accent-color:var(--ok)}
     .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
-    .chipbtn{border:1px solid var(--chip-border);background:rgba(255,255,255,.1);border-radius:999px;padding:6px 10px;font-weight:700;font-size:14px;color:var(--ink)}
+    .chipbtn{border:1px solid var(--chip-border);background:rgba(255,255,255,.14);border-radius:999px;padding:6px 10px;font-weight:800;font-size:14px;color:#fff}
     .chipbtn:hover{filter:brightness(1.08)}
     .chipbtn:active{transform:translateY(1px);filter:brightness(0.98)}
     :focus-visible{outline:3px solid rgba(255,255,255,.55);outline-offset:2px;border-radius:10px}
+
     @media (prefers-color-scheme: light){
-      body{background:linear-gradient(135deg,#d7ecff,#a9d3ff 55%, #86b8ff)}
-      :root{--ink:#0b1a33;--muted:rgba(11,26,51,.60);--card:rgba(255,255,255,.85);--card-border:rgba(0,0,0,.06);--input-bg:#ffffff;--input-border:rgba(0,0,0,.10);--chip-border:rgba(0,0,0,.12);--ok:#15803d}
-      .chipbtn{background:#fff;border-color:var(--chip-border)}
-      .btn{background:#ffffff;color:#0b1a33;border:1px solid rgba(0,0,0,.12);box-shadow:0 2px 8px rgba(0,0,0,.06)}
-      .btn.primary{background:#15803d;color:#fff;border-color:#0f5f2c;box-shadow:0 6px 14px rgba(21,128,61,.28)}
+      body{background:linear-gradient(135deg,#dff0ff,#b9dcff 55%, #95c3ff)}
+      :root{--ink:#0b1a33;--muted:rgba(11,26,51,.65);--card:rgba(255,255,255,.9);--card-border:rgba(0,0,0,.06);--input-bg:#ffffff;--input-border:rgba(0,0,0,.12);--chip-border:rgba(0,0,0,.15)}
+      .chipbtn{background:#fff;color:#0b1a33}
+      .btn{background:#ffffff;color:#0b1a33;border:1px solid rgba(0,0,0,.12);}
+      .btn.clear{background:#fff;color:#b91c1c;border-color:#ef4444}
     }
   </style>
 </head>
@@ -72,6 +76,7 @@
   <div class="wrap">
     <header>
       <h1>Sales Tax</h1>
+      <button class="btn clear" id="clearBtn" aria-label="Clear all">Clear</button>
     </header>
 
     <section class="card" aria-label="Inputs">
@@ -137,7 +142,7 @@
       </div>
       <div class="row" style="padding-top:0">
         <label class="muted">Grand Total (INR)</label>
-        <div class="right" id="totalINR" style="font-weight:700">₹0</div>
+        <div class="right" id="totalINR" style="font-weight:800">₹0</div>
       </div>
       <div class="subtle" id="rateNote">Using 1 CAD = <span id="rateDisplay">62.00</span> INR</div>
     </section>
@@ -150,20 +155,13 @@
         </div>
         <div class="right inline" style="gap:8px;">
           <button class="btn" id="saveRate">Save rate</button>
-          <button class="btn primary" id="fetchRate">Fetch latest</button>
+          <button class="btn" id="fetchRate">Fetch latest</button>
         </div>
       </div>
     </section>
 
-    <section class="card" aria-label="Quick actions">
-      <div class="grid2">
-        <button class="btn" id="clearBtn">Clear</button>
-        <button class="btn" id="shareBtn">Share result</button>
-      </div>
-    </section>
-
     <footer>
-      <div class="badge">Install via <strong>Share ▸ Add to Home Screen</strong></div>
+      <div class="subtle">Install via <strong>Share ▸ Add to Home Screen</strong></div>
     </footer>
   </div>
 
@@ -203,7 +201,6 @@
     }
 
     function toNumber(val){
-      // convert text inputs to numbers safely
       const n = Number(String(val).replace(/[^0-9.\-]/g,''));
       return Number.isFinite(n) ? n : 0;
     }
@@ -233,7 +230,6 @@
       rateDisplayEl.textContent = (rate || 0).toFixed(2);
     }
 
-    // Input listeners
     ['input','change'].forEach(evt=>{
       [priceEl,saleEl,hstEl,rateEl,tipEl,tipAfterTaxEl].forEach(el=> el.addEventListener(evt,()=>{ if(el===rateEl||el===hstEl||el===tipAfterTaxEl) persist(); calc(); }));
     });
@@ -243,6 +239,7 @@
       btn.addEventListener('click',()=>{ tipEl.value = btn.dataset.tip; calc(); });
     });
 
+    // Clear placed in header
     $('#clearBtn').addEventListener('click',()=>{priceEl.value=''; saleEl.value=''; tipEl.value=''; calc(); safeFocus();});
 
     $('#saveRate').addEventListener('click',()=>{ persist(); calc(); navigator.vibrate?.(8);});
@@ -261,15 +258,10 @@
       finally{ btn.textContent=original; btn.disabled=false; }
     });
 
-    // --- Try to focus the Price field on open (iOS often blocks keyboard; this is best-effort) ---
-    function safeFocus(){
-      priceEl.focus();
-      // select text to pull up the caret
-      try{ priceEl.setSelectionRange(0, priceEl.value.length); }catch(_){}
-    }
+    // Auto-focus behaviour (best‑effort on iOS)
+    function safeFocus(){ priceEl.focus(); try{ priceEl.setSelectionRange(0, priceEl.value.length); }catch(_){} }
     window.addEventListener('pageshow', ()=> setTimeout(safeFocus, 50));
     document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') setTimeout(safeFocus, 50); });
-    // Fallback: first tap anywhere focuses the field
     document.addEventListener('touchstart', function onFirstTouch(){ safeFocus(); document.removeEventListener('touchstart', onFirstTouch); }, {passive:true});
 
     // First paint
@@ -283,17 +275,16 @@
         description: 'Ad-free Sales Tax calculator for Ontario with INR total + optional tip.',
         start_url: '.',
         display: 'standalone',
-        background_color: '#0d74ce',
-        theme_color: '#0d74ce',
+        background_color: '#0d5cc0',
+        theme_color: '#0d5cc0',
         icons: []
       };
-      // Create a simple red square with a white dollar sign ($) as the icon
+      // Simple red square with a white dollar sign ($)
       function makeDollarIcon(size){
         const c=document.createElement('canvas'); c.width=c.height=size; const x=c.getContext('2d');
         x.fillStyle='#d32f2f'; x.fillRect(0,0,size,size);
-        x.fillStyle='#ffffff';
-        x.textAlign='center'; x.textBaseline='middle';
-        x.font = `bold ${Math.round(size*0.6)}px system-ui, -apple-system, Arial, sans-serif`;
+        x.fillStyle='#ffffff'; x.textAlign='center'; x.textBaseline='middle';
+        x.font = `bold ${Math.round(size*0.62)}px system-ui, -apple-system, Arial, sans-serif`;
         x.fillText('$', size/2, Math.round(size*0.58));
         return c.toDataURL('image/png');
       }
@@ -312,7 +303,7 @@
     // --- Service Worker via Blob (cache this single page for fast startup/offline) ---
     if('serviceWorker' in navigator){
       const swCode = `
-        const CACHE='salestax-pwa-v4';
+        const CACHE='salestax-pwa-v5';
         self.addEventListener('install', e=>{
           e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])));
           self.skipWaiting();
