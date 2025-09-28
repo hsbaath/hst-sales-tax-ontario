@@ -38,9 +38,9 @@
     .row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:8px 8px;border-radius:12px}
     .row + .row{margin-top:6px}
     label{font-size:16px;color:var(--muted)}
-    input[type="number"], input[type="text"]{width:160px;appearance:textfield;-moz-appearance:textfield;border:1px solid var(--input-border);outline:none;border-radius:12px;padding:10px 12px;font-size:18px;font-weight:700;background:var(--input-bg);color:var(--ink)}
+    /* Use type=text with inputmode=decimal to allow programmatic selection on iOS */
+    input[type="text"]{width:160px;border:1px solid var(--input-border);outline:none;border-radius:12px;padding:10px 12px;font-size:18px;font-weight:700;background:var(--input-bg);color:var(--ink)}
     input.small{width:110px;font-size:16px}
-    input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
     .muted{color:var(--muted)}
     .total{font-size:40px;font-weight:800;letter-spacing:0.3px;margin:6px 0 4px;text-shadow:0 1px 0 rgba(0,0,0,.12)}
     .subtle{font-size:14px;color:var(--muted)}
@@ -72,29 +72,28 @@
   <div class="wrap">
     <header>
       <h1>Sales Tax</h1>
-      <!-- badge removed per request -->
     </header>
 
     <section class="card" aria-label="Inputs">
       <div class="row">
         <label for="price">Price (CAD)</label>
-        <input id="price" type="number" inputmode="decimal" step="0.01" placeholder="0.00" autofocus>
+        <input id="price" type="text" inputmode="decimal" enterkeyhint="done" placeholder="0.00" autocomplete="off" autocorrect="off" spellcheck="false">
       </div>
       <div class="row">
         <label for="sale">Sale % (optional)</label>
-        <input id="sale" class="small" type="number" inputmode="decimal" step="0.1" placeholder="0">
+        <input id="sale" class="small" type="text" inputmode="decimal" enterkeyhint="next" placeholder="0" autocomplete="off" autocorrect="off" spellcheck="false">
       </div>
       <div class="row">
         <label for="hst">HST (Ontario)</label>
         <div class="inline right">
-          <input id="hst" class="small" type="number" step="0.1" value="13" aria-label="HST percent">
+          <input id="hst" class="small" type="text" inputmode="decimal" enterkeyhint="done" value="13" aria-label="HST percent" autocomplete="off" autocorrect="off" spellcheck="false">
           <span class="muted">%</span>
         </div>
       </div>
       <div class="row">
         <label for="tip">Tip % (optional)</label>
         <div class="inline right">
-          <input id="tip" class="small" type="number" inputmode="decimal" step="0.5" placeholder="0">
+          <input id="tip" class="small" type="text" inputmode="decimal" enterkeyhint="done" placeholder="0" autocomplete="off" autocorrect="off" spellcheck="false">
           <span class="muted">%</span>
         </div>
       </div>
@@ -147,7 +146,7 @@
       <div class="grid2">
         <div>
           <label for="rate" class="muted">INR per CAD</label>
-          <input id="rate" class="small" type="number" inputmode="decimal" step="0.01" value="62.00">
+          <input id="rate" class="small" type="text" inputmode="decimal" enterkeyhint="done" value="62.00" autocomplete="off" autocorrect="off" spellcheck="false">
         </div>
         <div class="right inline" style="gap:8px;">
           <button class="btn" id="saveRate">Save rate</button>
@@ -197,18 +196,24 @@
 
     function persist(){
       localStorage.setItem('hstpwa:state', JSON.stringify({
-        rate: Number(rateEl.value)||61,
+        rate: Number(rateEl.value)||62,
         hst: Number(hstEl.value)||13,
         tipAfterTax: !!tipAfterTaxEl.checked
       }));
     }
 
+    function toNumber(val){
+      // convert text inputs to numbers safely
+      const n = Number(String(val).replace(/[^0-9.\-]/g,''));
+      return Number.isFinite(n) ? n : 0;
+    }
+
     function calc(){
-      const price = Number(priceEl.value)||0;
-      const salePct = Number(saleEl.value)||0;
-      const hstPct = Number(hstEl.value)||13;
-      const rate = Number(rateEl.value)||61;
-      const tipPct = Number(tipEl.value)||0;
+      const price = toNumber(priceEl.value);
+      const salePct = toNumber(saleEl.value);
+      const hstPct = toNumber(hstEl.value) || 13;
+      const rate = toNumber(rateEl.value) || 62;
+      const tipPct = toNumber(tipEl.value);
       const tipOnAfterTax = !!tipAfterTaxEl.checked;
 
       const discounted = price * (1 - (salePct/100));
@@ -219,15 +224,16 @@
       const tipAmt = tipBase * (tipPct/100);
       const grand = totalNoTip + tipAmt;
 
-      subtotalEl.textContent = fmtCAD.format(discounted);
-      taxEl.textContent = fmtCAD.format(tax);
-      totalCADEl.textContent = fmtCAD.format(totalNoTip);
-      tipCADEl.textContent = fmtCAD.format(tipAmt);
-      grandCADEl.textContent = fmtCAD.format(grand);
-      totalINREl.textContent = fmtINR.format(grand * rate);
-      rateDisplayEl.textContent = rate.toFixed(2);
+      subtotalEl.textContent = fmtCAD.format(discounted || 0);
+      taxEl.textContent = fmtCAD.format(tax || 0);
+      totalCADEl.textContent = fmtCAD.format(totalNoTip || 0);
+      tipCADEl.textContent = fmtCAD.format(tipAmt || 0);
+      totalINREl.textContent = fmtINR.format((grand || 0) * rate);
+      grandCADEl.textContent = fmtCAD.format(grand || 0);
+      rateDisplayEl.textContent = (rate || 0).toFixed(2);
     }
 
+    // Input listeners
     ['input','change'].forEach(evt=>{
       [priceEl,saleEl,hstEl,rateEl,tipEl,tipAfterTaxEl].forEach(el=> el.addEventListener(evt,()=>{ if(el===rateEl||el===hstEl||el===tipAfterTaxEl) persist(); calc(); }));
     });
@@ -237,7 +243,7 @@
       btn.addEventListener('click',()=>{ tipEl.value = btn.dataset.tip; calc(); });
     });
 
-    $('#clearBtn').addEventListener('click',()=>{priceEl.value=''; saleEl.value=''; tipEl.value=''; calc(); priceEl.focus();});
+    $('#clearBtn').addEventListener('click',()=>{priceEl.value=''; saleEl.value=''; tipEl.value=''; calc(); safeFocus();});
 
     $('#saveRate').addEventListener('click',()=>{ persist(); calc(); navigator.vibrate?.(8);});
 
@@ -255,6 +261,17 @@
       finally{ btn.textContent=original; btn.disabled=false; }
     });
 
+    // --- Try to focus the Price field on open (iOS often blocks keyboard; this is best-effort) ---
+    function safeFocus(){
+      priceEl.focus();
+      // select text to pull up the caret
+      try{ priceEl.setSelectionRange(0, priceEl.value.length); }catch(_){}
+    }
+    window.addEventListener('pageshow', ()=> setTimeout(safeFocus, 50));
+    document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') setTimeout(safeFocus, 50); });
+    // Fallback: first tap anywhere focuses the field
+    document.addEventListener('touchstart', function onFirstTouch(){ safeFocus(); document.removeEventListener('touchstart', onFirstTouch); }, {passive:true});
+
     // First paint
     calc();
 
@@ -270,39 +287,17 @@
         theme_color: '#0d74ce',
         icons: []
       };
-      // Create a simple Canadian flag icon on the fly
-      function makeFlagIcon(size){
+      // Create a simple red square with a white dollar sign ($) as the icon
+      function makeDollarIcon(size){
         const c=document.createElement('canvas'); c.width=c.height=size; const x=c.getContext('2d');
-        // Flag background: white center with red side bars
-        x.fillStyle='#ffffff'; x.fillRect(0,0,size,size);
-        x.fillStyle='#d32f2f';
-        const barW = Math.round(size*0.18);
-        x.fillRect(0,0,barW,size);
-        x.fillRect(size-barW,0,barW,size);
-        // stylized maple leaf
-        x.translate(size/2, size*0.52);
-        x.beginPath();
-        const r=size*0.17;
-        x.moveTo(0,-r*1.5);
-        x.lineTo(r*0.35,-r*0.4);
-        x.lineTo(r*1.1,-r*0.8);
-        x.lineTo(r*0.6,-r*0.1);
-        x.lineTo(r*1.2,r*0.2);
-        x.lineTo(r*0.3,r*0.3);
-        x.lineTo(r*0.35,r*1.4);
-        x.lineTo(0,r*0.9);
-        x.lineTo(-r*0.35,r*1.4);
-        x.lineTo(-r*0.3,r*0.3);
-        x.lineTo(-r*1.2,r*0.2);
-        x.lineTo(-r*0.6,-r*0.1);
-        x.lineTo(-r*1.1,-r*0.8);
-        x.lineTo(-r*0.35,-r*0.4);
-        x.closePath();
-        x.fillStyle='#d32f2f';
-        x.fill();
+        x.fillStyle='#d32f2f'; x.fillRect(0,0,size,size);
+        x.fillStyle='#ffffff';
+        x.textAlign='center'; x.textBaseline='middle';
+        x.font = `bold ${Math.round(size*0.6)}px system-ui, -apple-system, Arial, sans-serif`;
+        x.fillText('$', size/2, Math.round(size*0.58));
         return c.toDataURL('image/png');
       }
-      manifest.icons = [192,256,384,512].map(s => ({ src: makeFlagIcon(s), sizes: `${s}x${s}`, type: 'image/png' }));
+      manifest.icons = [192,256,384,512].map(s => ({ src: makeDollarIcon(s), sizes: `${s}x${s}`, type: 'image/png' }));
 
       const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
       const url = URL.createObjectURL(blob);
@@ -310,14 +305,14 @@
       link.rel = 'manifest'; link.href = url; document.head.appendChild(link);
 
       const appleIcon = document.createElement('link');
-      appleIcon.rel='apple-touch-icon'; appleIcon.href=makeFlagIcon(180);
+      appleIcon.rel='apple-touch-icon'; appleIcon.href=makeDollarIcon(180);
       document.head.appendChild(appleIcon);
     })();
 
     // --- Service Worker via Blob (cache this single page for fast startup/offline) ---
     if('serviceWorker' in navigator){
       const swCode = `
-        const CACHE='salestax-pwa-v3';
+        const CACHE='salestax-pwa-v4';
         self.addEventListener('install', e=>{
           e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])));
           self.skipWaiting();
