@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d74ce" />
+  <title>Sales Tax</title>
+  <!-- iOS: open fullscreen when added to Home Screen -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Sales Tax">
+  <style>
+    :root{
+      --bg:#0d74ce; /* primary */
+      --ink:#ffffff;
+      --muted:rgba(255,255,255,.82); /* slightly stronger */
+      --card:rgba(255,255,255,.08);  /* clearer separation */
+      --card-border:rgba(255,255,255,.22);
+      --input-bg:rgba(255,255,255,.20);
+      --input-border:rgba(255,255,255,.28);
+      --chip-border:rgba(255,255,255,.30);
+      --ok:#16a34a; /* deeper green */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;}
+    body{
+      margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background: radial-gradient(120% 120% at 0% 0%, #0a67b7, #0d74ce 55%, #0e5fa4 115%);
+      color:var(--ink);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    .wrap{max-width:620px;margin:0 auto;padding:16px 18px 24px}
+    header{display:flex;align-items:center;justify-content:space-between;padding:6px 0 4px}
+    h1{font-size:20px;margin:0;font-weight:700;letter-spacing:.2px}
+    .chip{font-size:12px;opacity:.95;border:1px solid var(--chip-border);padding:4px 8px;border-radius:999px}
+    .card{background:var(--card);border:1px solid var(--card-border);backdrop-filter:saturate(1.2) blur(2px);border-radius:18px;padding:14px 14px;margin-top:12px}
+    .row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:8px 8px;border-radius:12px}
+    .row + .row{margin-top:6px}
+    label{font-size:16px;color:var(--muted)}
+    input[type="number"], input[type="text"]{width:160px;appearance:textfield;-moz-appearance:textfield;border:1px solid var(--input-border);outline:none;border-radius:12px;padding:10px 12px;font-size:18px;font-weight:700;background:var(--input-bg);color:var(--ink)}
+    input.small{width:110px;font-size:16px}
+    input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+    .muted{color:var(--muted)}
+    .total{font-size:40px;font-weight:800;letter-spacing:0.3px;margin:6px 0 4px;text-shadow:0 1px 0 rgba(0,0,0,.12)}
+    .subtle{font-size:14px;color:var(--muted)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .btn{appearance:none;border:1px solid var(--chip-border);background:rgba(255,255,255,.20);color:var(--ink);border-radius:12px;padding:12px 14px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+    .btn.primary{background:rgba(22,163,74,.9);border-color:rgba(22,163,74,1);color:#fff;box-shadow:0 6px 14px rgba(22,163,74,.35)}
+    .btn:active{transform:translateY(1px)}
+    .ok{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.45)}
+    footer{opacity:.85;text-align:center;margin-top:16px;font-size:12px}
+    .badge{display:inline-flex;gap:8px;align-items:center;opacity:.95}
+    .inline{display:inline-flex;gap:10px;align-items:center}
+    .right{justify-self:end}
+    .switch{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+    .switch input{accent-color:var(--ok)}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+    .chipbtn{border:1px solid var(--chip-border);background:rgba(255,255,255,.1);border-radius:999px;padding:6px 10px;font-weight:700;font-size:14px;color:var(--ink)}
+    .chipbtn:hover{filter:brightness(1.08)}
+    .chipbtn:active{transform:translateY(1px);filter:brightness(0.98)}
+    :focus-visible{outline:3px solid rgba(255,255,255,.55);outline-offset:2px;border-radius:10px}
+    @media (prefers-color-scheme: light){
+      body{background:linear-gradient(135deg,#d7ecff,#a9d3ff 55%, #86b8ff)}
+      :root{--ink:#0b1a33;--muted:rgba(11,26,51,.60);--card:rgba(255,255,255,.85);--card-border:rgba(0,0,0,.06);--input-bg:#ffffff;--input-border:rgba(0,0,0,.10);--chip-border:rgba(0,0,0,.12);--ok:#15803d}
+      .chipbtn{background:#fff;border-color:var(--chip-border)}
+      .btn{background:#ffffff;color:#0b1a33;border:1px solid rgba(0,0,0,.12);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+      .btn.primary{background:#15803d;color:#fff;border-color:#0f5f2c;box-shadow:0 6px 14px rgba(21,128,61,.28)}
+    }
+      :root{--ink:#0b1a33;--muted:rgba(11,26,51,.60);--card:rgba(255,255,255,.85);--card-border:rgba(0,0,0,.06);--input-bg:#ffffff;--input-border:rgba(0,0,0,.10);--chip-border:rgba(0,0,0,.12);--ok:#15803d}
+      .chipbtn{background:#fff;border-color:var(--chip-border)}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Sales Tax</h1>
+      
+    </header>
+
+    <section class="card" aria-label="Inputs">
+      <div class="row">
+        <label for="price">Price (CAD)</label>
+        <input id="price" type="number" inputmode="decimal" step="0.01" placeholder="0.00" autofocus>
+      </div>
+      <div class="row">
+        <label for="sale">Sale % (optional)</label>
+        <input id="sale" class="small" type="number" inputmode="decimal" step="0.1" placeholder="0">
+      </div>
+      <div class="row">
+        <label for="hst">HST (Ontario)</label>
+        <div class="inline right">
+          <input id="hst" class="small" type="number" step="0.1" value="13" aria-label="HST percent">
+          <span class="muted">%</span>
+        </div>
+      </div>
+      <div class="row">
+        <label for="tip">Tip % (optional)</label>
+        <div class="inline right">
+          <input id="tip" class="small" type="number" inputmode="decimal" step="0.5" placeholder="0">
+          <span class="muted">%</span>
+        </div>
+      </div>
+      <div class="row" style="padding-top:0">
+        <label class="muted">Quick tip</label>
+        <div class="chips right" aria-label="Quick tip buttons">
+          <button type="button" class="chipbtn" data-tip="5">5%</button>
+          <button type="button" class="chipbtn" data-tip="10">10%</button>
+          <button type="button" class="chipbtn" data-tip="12">12%</button>
+          <button type="button" class="chipbtn" data-tip="15">15%</button>
+        </div>
+      </div>
+      <div class="row" style="padding-top:0">
+        <label class="muted">Tip calculation</label>
+        <div class="right switch">
+          <input type="checkbox" id="tipAfterTax"> <label for="tipAfterTax">After tax</label>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-label="Results">
+      <div class="row">
+        <label>Discounted Subtotal</label>
+        <div class="right" id="subtotalCAD">$0.00</div>
+      </div>
+      <div class="row">
+        <label>HST Amount</label>
+        <div class="right" id="taxCAD">$0.00</div>
+      </div>
+      <div class="row">
+        <label class="muted">Total w/ HST (no tip)</label>
+        <div class="right" id="totalCAD">$0.00</div>
+      </div>
+      <div class="row">
+        <label>Tip Amount</label>
+        <div class="right" id="tipCAD">$0.00</div>
+      </div>
+      <div class="row">
+        <label class="muted">Grand Total (incl. tip)</label>
+        <div class="total right" id="grandCAD">$0.00</div>
+      </div>
+      <div class="row" style="padding-top:0">
+        <label class="muted">Grand Total (INR)</label>
+        <div class="right" id="totalINR" style="font-weight:700">₹0</div>
+      </div>
+      
+    </section>
+
+    <section class="card" aria-label="Quick actions">
+      <div class="grid2">
+        <button class="btn" id="clearBtn">Clear</button>
+        <button class="btn" id="shareBtn">Share result</button>
+      </div>
+    </section>
+
+    <footer>
+      <div class="badge">Made for Ontario • Install via <strong>Share ▸ Add to Home Screen</strong></div>
+    </footer>
+  </div>
+
+  <script>
+    // --- Utility formatters ---
+    const fmtCAD = new Intl.NumberFormat('en-CA',{style:'currency', currency:'CAD'});
+    const fmtINR = new Intl.NumberFormat('en-IN',{style:'currency', currency:'INR', maximumFractionDigits:0});
+
+    const $ = sel => document.querySelector(sel);
+    const priceEl = $('#price');
+    const saleEl = $('#sale');
+    const hstEl = $('#hst');
+    const rateEl = $('#rate');
+    const tipEl = $('#tip');
+    const tipAfterTaxEl = $('#tipAfterTax');
+
+    const subtotalEl = $('#subtotalCAD');
+    const taxEl = $('#taxCAD');
+    const totalCADEl = $('#totalCAD');
+    const tipCADEl = $('#tipCAD');
+    const grandCADEl = $('#grandCAD');
+    const totalINREl = $('#totalINR');
+    const rateDisplayEl = $('#rateDisplay');
+
+    // Load saved state
+    const SAVED = JSON.parse(localStorage.getItem('hstpwa:state')||'{}');
+    if(SAVED.rate) rateEl.value = String(SAVED.rate);
+    if(SAVED.hst) hstEl.value = String(SAVED.hst);
+    if(SAVED.tipAfterTax) tipAfterTaxEl.checked = true;
+
+    function persist(){
+      localStorage.setItem('hstpwa:state', JSON.stringify({
+        rate: Number(rateEl.value)||61,
+        hst: Number(hstEl.value)||13,
+        tipAfterTax: !!tipAfterTaxEl.checked
+      }));
+    }
+
+    function calc(){
+      const price = Number(priceEl.value)||0;
+      const salePct = Number(saleEl.value)||0;
+      const hstPct = Number(hstEl.value)||13;
+      const rate = Number(rateEl.value)||61;
+      const tipPct = Number(tipEl.value)||0;
+      const tipOnAfterTax = !!tipAfterTaxEl.checked;
+
+      const discounted = price * (1 - (salePct/100));
+      const tax = discounted * (hstPct/100);
+      const totalNoTip = discounted + tax;
+
+      const tipBase = tipOnAfterTax ? totalNoTip : discounted; // default: pre-tax
+      const tipAmt = tipBase * (tipPct/100);
+      const grand = totalNoTip + tipAmt;
+
+      subtotalEl.textContent = fmtCAD.format(discounted);
+      taxEl.textContent = fmtCAD.format(tax);
+      totalCADEl.textContent = fmtCAD.format(totalNoTip);
+      tipCADEl.textContent = fmtCAD.format(tipAmt);
+      grandCADEl.textContent = fmtCAD.format(grand);
+      totalINREl.textContent = fmtINR.format(grand * rate);
+      rateDisplayEl.textContent = rate.toFixed(2);
+    }
+
+    ['input','change'].forEach(evt=>{
+      [priceEl,saleEl,hstEl,rateEl,tipEl,tipAfterTaxEl].forEach(el=> el.addEventListener(evt,()=>{ if(el===rateEl||el===hstEl||el===tipAfterTaxEl) persist(); calc(); }));
+    });
+
+    // Quick tip buttons
+    document.querySelectorAll('[data-tip]').forEach(btn=>{
+      btn.addEventListener('click',()=>{ tipEl.value = btn.dataset.tip; calc(); });
+    });
+
+    $('#clearBtn').addEventListener('click',()=>{priceEl.value=''; saleEl.value=''; tipEl.value=''; calc(); priceEl.focus();});
+
+    $('#saveRate').addEventListener('click',()=>{ persist(); calc(); navigator.vibrate?.(8);});
+
+    $('#fetchRate').addEventListener('click', async ()=>{
+      const btn = $('#fetchRate');
+      const original = btn.textContent; btn.textContent='Fetching…'; btn.disabled=true;
+      try{
+        const res = await fetch('https://open.er-api.com/v6/latest/CAD', {cache:'no-store'});
+        const data = await res.json();
+        if(data && data.result==='success' && data.rates && data.rates.INR){
+          rateEl.value = String(Number(data.rates.INR).toFixed(2));
+          persist(); calc();
+        } else { alert('Could not get a rate; set it manually.'); }
+      }catch(e){ alert('Network error; set the INR rate manually.'); }
+      finally{ btn.textContent=original; btn.disabled=false; }
+    });
+
+    $('#shareBtn').addEventListener('click', async ()=>{
+      const text = `${grandCADEl.textContent} CAD (incl. tip) — ${totalINREl.textContent}`;
+      if(navigator.share){ try{ await navigator.share({text}); }catch(_){} }
+      else{ navigator.clipboard?.writeText(text); alert('Copied to clipboard: '+text); }
+    });
+
+    // First paint
+    calc();
+
+    // --- Manifest via Blob (single-file app) ---
+    (function initManifest(){
+      const manifest = {
+        name: 'Sales Tax',
+        short_name: 'Sales Tax',
+        description: 'Ad-free Sales Tax calculator for Ontario with INR total + optional tip.',
+        start_url: '.',
+        display: 'standalone',
+        background_color: '#0d74ce',
+        theme_color: '#0d74ce',
+        icons: [
+          // A simple blue rounded square as data URL PNG (generated from inline SVG -> PNG via canvas)
+        ]
+      };
+      // Create a basic 512x512 icon on the fly
+      function makeFlagIcon(size){
+        const c=document.createElement('canvas'); c.width=c.height=size; const x=c.getContext('2d');
+        // Flag background: white center with red side bars
+        x.fillStyle='#ffffff'; x.fillRect(0,0,size,size);
+        x.fillStyle='#d32f2f';
+        const barW = Math.round(size*0.18);
+        x.fillRect(0,0,barW,size);
+        x.fillRect(size-barW,0,barW,size);
+        // Simple maple leaf (stylized polygon)
+        x.translate(size/2, size*0.52);
+        x.beginPath();
+        const s=size; const r=s*0.17;
+        // crude leaf shape
+        x.moveTo(0,-r*1.5);
+        x.lineTo(r*0.35,-r*0.4);
+        x.lineTo(r*1.1,-r*0.8);
+        x.lineTo(r*0.6,-r*0.1);
+        x.lineTo(r*1.2,r*0.2);
+        x.lineTo(r*0.3,r*0.3);
+        x.lineTo(r*0.35,r*1.4);
+        x.lineTo(0,r*0.9);
+        x.lineTo(-r*0.35,r*1.4);
+        x.lineTo(-r*0.3,r*0.3);
+        x.lineTo(-r*1.2,r*0.2);
+        x.lineTo(-r*0.6,-r*0.1);
+        x.lineTo(-r*1.1,-r*0.8);
+        x.lineTo(-r*0.35,-r*0.4);
+        x.closePath();
+        x.fill();
+        return c.toDataURL('image/png');
+      }
+      manifest.icons = [192,256,384,512].map(s=>({src: makeFlagIcon(s), sizes:`${s}x${s}`, type:'image/png'}));
+
+      const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('link');
+      link.rel = 'manifest'; link.href = url; document.head.appendChild(link);
+
+      const appleIcon = document.createElement('link');
+      appleIcon.rel='apple-touch-icon'; appleIcon.href=makeFlagIcon(180);
+      document.head.appendChild(appleIcon);
+    })();
+
+    // --- Service Worker via Blob (cache this single page for fast startup/offline) ---
+    if('serviceWorker' in navigator){
+      const swCode = `
+        const CACHE='salestax-pwa-v1';
+        self.addEventListener('install', e=>{
+          e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])));
+          self.skipWaiting();
+        });
+        self.addEventListener('activate', e=>{ e.waitUntil(self.clients.claim()); });
+        self.addEventListener('fetch', e=>{
+          const req = e.request;
+          if(req.method!=='GET') return;
+          e.respondWith(
+            caches.match(req).then(hit=> hit || fetch(req).then(res=>{
+              if(new URL(req.url).origin===location.origin){
+                const copy = res.clone(); caches.open(CACHE).then(c=>c.put(req, copy));
+              }
+              return res;
+            }).catch(()=> caches.match('./')))
+          );
+        });`;
+      const swUrl = URL.createObjectURL(new Blob([swCode], {type:'text/javascript'}));
+      navigator.serviceWorker.register(swUrl).catch(()=>{});
+    }
+  </script>
+</body>
+</html>
