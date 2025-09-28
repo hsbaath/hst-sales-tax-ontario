@@ -48,7 +48,6 @@
     .btn{appearance:none;border:1px solid var(--chip-border);background:rgba(255,255,255,.20);color:var(--ink);border-radius:12px;padding:12px 14px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.08)}
     .btn.primary{background:rgba(22,163,74,.9);border-color:rgba(22,163,74,1);color:#fff;box-shadow:0 6px 14px rgba(22,163,74,.35)}
     .btn:active{transform:translateY(1px)}
-    .ok{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.45)}
     footer{opacity:.85;text-align:center;margin-top:16px;font-size:12px}
     .badge{display:inline-flex;gap:8px;align-items:center;opacity:.95}
     .inline{display:inline-flex;gap:10px;align-items:center}
@@ -67,16 +66,13 @@
       .btn{background:#ffffff;color:#0b1a33;border:1px solid rgba(0,0,0,.12);box-shadow:0 2px 8px rgba(0,0,0,.06)}
       .btn.primary{background:#15803d;color:#fff;border-color:#0f5f2c;box-shadow:0 6px 14px rgba(21,128,61,.28)}
     }
-      :root{--ink:#0b1a33;--muted:rgba(11,26,51,.60);--card:rgba(255,255,255,.85);--card-border:rgba(0,0,0,.06);--input-bg:#ffffff;--input-border:rgba(0,0,0,.10);--chip-border:rgba(0,0,0,.12);--ok:#15803d}
-      .chipbtn{background:#fff;border-color:var(--chip-border)}
-    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <h1>Sales Tax</h1>
-      
+      <!-- badge removed per request -->
     </header>
 
     <section class="card" aria-label="Inputs">
@@ -144,7 +140,20 @@
         <label class="muted">Grand Total (INR)</label>
         <div class="right" id="totalINR" style="font-weight:700">₹0</div>
       </div>
-      
+      <div class="subtle" id="rateNote">Using 1 CAD = <span id="rateDisplay">61.00</span> INR</div>
+    </section>
+
+    <section class="card" aria-label="INR rate">
+      <div class="grid2">
+        <div>
+          <label for="rate" class="muted">INR per CAD</label>
+          <input id="rate" class="small" type="number" inputmode="decimal" step="0.01" value="61.00">
+        </div>
+        <div class="right inline" style="gap:8px;">
+          <button class="btn" id="saveRate">Save rate</button>
+          <button class="btn primary" id="fetchRate">Fetch latest</button>
+        </div>
+      </div>
     </section>
 
     <section class="card" aria-label="Quick actions">
@@ -155,7 +164,7 @@
     </section>
 
     <footer>
-      <div class="badge">Made for Ontario • Install via <strong>Share ▸ Add to Home Screen</strong></div>
+      <div class="badge">Install via <strong>Share ▸ Add to Home Screen</strong></div>
     </footer>
   </div>
 
@@ -246,12 +255,6 @@
       finally{ btn.textContent=original; btn.disabled=false; }
     });
 
-    $('#shareBtn').addEventListener('click', async ()=>{
-      const text = `${grandCADEl.textContent} CAD (incl. tip) — ${totalINREl.textContent}`;
-      if(navigator.share){ try{ await navigator.share({text}); }catch(_){} }
-      else{ navigator.clipboard?.writeText(text); alert('Copied to clipboard: '+text); }
-    });
-
     // First paint
     calc();
 
@@ -265,11 +268,9 @@
         display: 'standalone',
         background_color: '#0d74ce',
         theme_color: '#0d74ce',
-        icons: [
-          // A simple blue rounded square as data URL PNG (generated from inline SVG -> PNG via canvas)
-        ]
+        icons: []
       };
-      // Create a basic 512x512 icon on the fly
+      // Create a simple Canadian flag icon on the fly
       function makeFlagIcon(size){
         const c=document.createElement('canvas'); c.width=c.height=size; const x=c.getContext('2d');
         // Flag background: white center with red side bars
@@ -278,11 +279,10 @@
         const barW = Math.round(size*0.18);
         x.fillRect(0,0,barW,size);
         x.fillRect(size-barW,0,barW,size);
-        // Simple maple leaf (stylized polygon)
+        // stylized maple leaf
         x.translate(size/2, size*0.52);
         x.beginPath();
-        const s=size; const r=s*0.17;
-        // crude leaf shape
+        const r=size*0.17;
         x.moveTo(0,-r*1.5);
         x.lineTo(r*0.35,-r*0.4);
         x.lineTo(r*1.1,-r*0.8);
@@ -298,10 +298,11 @@
         x.lineTo(-r*1.1,-r*0.8);
         x.lineTo(-r*0.35,-r*0.4);
         x.closePath();
+        x.fillStyle='#d32f2f';
         x.fill();
         return c.toDataURL('image/png');
       }
-      manifest.icons = [192,256,384,512].map(s=>({src: makeFlagIcon(s), sizes:`${s}x${s}`, type:'image/png'}));
+      manifest.icons = [192,256,384,512].map(s => ({ src: makeFlagIcon(s), sizes: `${s}x${s}`, type: 'image/png' }));
 
       const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
       const url = URL.createObjectURL(blob);
@@ -316,7 +317,7 @@
     // --- Service Worker via Blob (cache this single page for fast startup/offline) ---
     if('serviceWorker' in navigator){
       const swCode = `
-        const CACHE='salestax-pwa-v1';
+        const CACHE='salestax-pwa-v3';
         self.addEventListener('install', e=>{
           e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])));
           self.skipWaiting();
